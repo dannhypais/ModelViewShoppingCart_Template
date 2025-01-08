@@ -25,11 +25,12 @@ import java.util.Collection;
  *
  * @author patriciamacedo
  */
-public class ShoppingCartUI extends VBox {
+public class ShoppingCartUI extends VBox implements Observer{
 
     //controlos
     private TextField txtInputId;
     private Button btAddProduct;
+    private Button btRemoveProduct;
     private ListView<Product> listProductsView;
     private Label lblError;
     private Label lblCount;
@@ -48,12 +49,13 @@ public class ShoppingCartUI extends VBox {
         
         this.txtInputId = new TextField();
         this.btAddProduct = new Button("Add");
+        this.btRemoveProduct = new Button("Remove");
         this.listProductsView = new ListView<>();
         lblError = new Label();
         
         lblCount = new Label("0");
         
-        HBox firstRow = new HBox(txtInputId,btAddProduct, new Label("Total Value"),lblCount);
+        HBox firstRow = new HBox(txtInputId,btAddProduct, btRemoveProduct, new Label("Total Value"),lblCount);
         firstRow.setAlignment(Pos.CENTER);
         firstRow.setPadding(new Insets(2,2,2,2));
         firstRow.setSpacing(4);
@@ -63,9 +65,13 @@ public class ShoppingCartUI extends VBox {
 
     private void setTriggers() {
         btAddProduct.setOnAction((ActionEvent event) -> {
+            lblError.setText("");
             doAddProduct();
         });
-
+        btRemoveProduct.setOnAction((ActionEvent event) -> {
+            lblError.setText("");
+            doRemoveProduct();
+        });
     }
 
     private void doAddProduct() {
@@ -73,6 +79,7 @@ public class ShoppingCartUI extends VBox {
 
         try {
             model.addProduct(Integer.parseInt(id));
+
             clearInput();
         } catch (ShoppingCartException e) {
             showError(e.getMessage());
@@ -82,6 +89,18 @@ public class ShoppingCartUI extends VBox {
         }
     }
 
+    private void doRemoveProduct() {
+        Product selectedProduct = getSelectedProduct();
+        if(selectedProduct == null) {
+            showError("Please select a product to remove");
+        } else {
+            model.removerProduct(selectedProduct);
+        }
+    }
+
+    private Product getSelectedProduct() {
+        return listProductsView.getSelectionModel().getSelectedItem();
+    }
 
 
     private void showError(String msg) {
@@ -98,6 +117,16 @@ public class ShoppingCartUI extends VBox {
         txtInputId.setText("");
     }
 
-   
-    
+
+    /**
+     * When a observer is notified execute this function
+     *
+     * @param obj - argument of the method
+     */
+    @Override
+    public void update(Object obj) {
+        this.listProductsView.getItems().clear();
+        listProductsView.getItems().addAll(model.getProducts());
+        lblCount.setText("" + model.getTotal());
+    }
 }

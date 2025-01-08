@@ -24,9 +24,11 @@ public class Main extends Application {
         ShoppingCart model = new ShoppingCart("Bruno");
         ShoppingCartUI view = new ShoppingCartUI(model);
         // TODO link subject to observer
+        model.addObservers(view);
+
         BorderPane window = new BorderPane();
         window.setCenter(view);
-        Scene scene = new Scene(window, 300, 250);
+        Scene scene = new Scene(window, 400, 350);
         primaryStage.setTitle("Shopping Cart");
         primaryStage.setScene(scene);
         primaryStage.show();
